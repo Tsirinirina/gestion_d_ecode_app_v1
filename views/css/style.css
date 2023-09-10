@@ -1,0 +1,21 @@
+.lettre-encadree {
+  width: 100px;
+  height: 30px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 30px;
+  border-radius: 30px;
+  background-color: #3498db;
+  color: #030303;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  overflow: hidden; /* Cache le contenu qui dépasse les dimensions */
+}
+
+.main_contenue {
+  margin-top: 80px;
+  padding: 10px 20px 20px 20px;
+}
+
+.fa-1x {
+  font-size: 28px;
+}
