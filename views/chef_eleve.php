@@ -3,7 +3,8 @@
 <?php
 session_start();
 
-function monAutoloader($classN) {
+function monAutoloader($classN)
+{
     require '../models/' . $classN . '.php';
 }
 
@@ -524,7 +525,7 @@ include_once "_head.php";
                             ?>
                                     <td>
                                         <form action='' method='post'>
-                                            
+
                                             <a class='btn btn-outline-danger' href='admin_eleve.php?id=<?= $id_eleve ?>' name='supprimer'><i class='fa fa-trash'></i></a>
                                         </form>
                                     </td>
@@ -550,7 +551,7 @@ include_once "_head.php";
                                         </div>';
                                 }
                             }
-                     
+
                             ?>
                         </tr>
 
@@ -607,7 +608,7 @@ include_once "_head.php";
 
                             </div>
                             <?php
-  $msg2 = null;
+                            $msg2 = null;
 
                             if (isset($_POST['ajouterEleve'])) {
 

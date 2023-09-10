@@ -16,7 +16,93 @@ if (!isset($_SESSION['pseudo'])) {
 
 include_once "_head.php";
 ?>
+<?php
+$msg = null;
+$msg2 = null;
+if (isset($_POST['ajouterProf'])) {
+    if (!empty($_POST['nom_prof']) || !empty($_POST['prenom_prof']) || !empty($_POST['email_Prof']) || !empty($_POST['heure_Prof']) || !empty($_POST['tel_Prof'])) {
+        $admin = new Admin();
+        $nom = $_POST['nom_prof'];
+        $prenom = $_POST['prenom_prof'];
+        $date = $_POST['date_Prof'];
+        $email = $_POST['email_Prof'];
+        $fonction = $_POST['fonction'];
+        $heure = $_POST['heure_Prof'];
+        $tel = $_POST['tel_Prof'];
+        $mdp = md5("azerty");
+        $premier = null;
+        $auth = 0;
+        if ($fonction == "Chef") {
+            $auth = 2;
+            $premier = "C-000";
+        }
+        if ($fonction == "Professeur") {
+            $auth = 3;
+            $premier = "P-000";
+        }
+        $prof = new Prof();
+        $res = $prof->compterIdentification();
+        if (mysqli_num_rows($res) > 0) {
+            while ($donnes = mysqli_fetch_assoc($res)) {
+                $id_prof = $donnes['identifiant'];
+            }
+            $l = strlen($id_prof);
+            $dernier_nombre = substr($id_prof, -4, $l);
+            $dernier_nombre = $dernier_nombre + 1;
+            $identifiant = $premier . "" . $dernier_nombre;
+        }
+        $user = new Utilisateur();
+        $existe = $user->siUserExiste('proffesseur', $nom, $prenom);
 
+        $res = $admin->ajouterProf($nom, $prenom, $date, $heure, $email, $tel, $identifiant, $mdp, $auth);
+        if ($res == true) {
+
+            $msg =
+                '<div class="alert alert-success alert-dismissible fade show">
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                                <strong><i class="fa fa-smile-o"></i></strong> Ajout avec success.
+                                            </div>';
+        } else {
+            include_once "admin_prof.php";
+            $msg = '<div class="alert alert-danger alert-dismissible fade show">
+                                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                                    <strong><i class="fa fa-frown-o"></i></strong> Erreur sur insertion.
+                                                </div>';
+        }
+    } else {
+        include_once "admin_prof.php";
+        $msg = '<div class="alert alert-warning alert-dismissible fade show">
+                                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                                    <strong><i class="fa fa-thumbs-o-down"></i></strong> Veuillez remplir les champs.
+                                                </div>';
+    }
+}
+
+
+
+
+
+if (isset($_GET['id'])) {
+    $prof = new Prof();
+    $res = $prof->supprimerProf($_GET['id']);
+
+    if ($res === true) {
+        $msg =
+            '<div class="alert alert-success alert-dismissible fade show">
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                            <strong><i class="fa fa-smile-o"></i></strong> Suppression avec success.
+                                        </div>';
+    } else {
+        $msg =
+            '<div class="alert alert-danger alert-dismissible fade show">
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                            <strong><i class="fa fa-frown-o"></i></strong> Erreur sur suppression .
+                                        </div>';
+    }
+}
+
+
+?>
 
 
 <body>
@@ -35,13 +121,13 @@ include_once "_head.php";
                             <a href="admin_accueil.php" class="nav-link ">Tableau de Bord </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" href="admin_prof.php" aria-current="page">Proffesseur</a>
+                            <a class="nav-link active" href="admin_prof.php" aria-current="page">Professeur</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="admin_eleve.php">Eleve</a>
+                            <a class="nav-link" href="admin_eleve.php">Élève</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="admin_matiere.php">Matiere</a>
+                            <a class="nav-link" href="admin_matiere.php">Matière</a>
                         </li>
                     </ul>
 
@@ -75,23 +161,17 @@ include_once "_head.php";
                     <p>Bienvenue dans l' espace administratif</p>
                 </div>
             </div>
-
-
+            <div >
+                <?php echo $msg; ?>
+                <?php echo $msg2; ?>
+            </div>
+            <div>
+                <h2>Professeur</h2>
+            </div>
             <div class="row">
-
-                <div class="carte_titr">
-                    <h2>Proffesseur</h2>
-                    <div class="input-group mb-0" style="width: 250px;">
-                        <input type="text" class="form-control" placeholder="Recherche..." aria-label="Recherche" aria-describedby="basic-addon1">
-                        <button class="input-group-text" id="basic-addon1"><i class="fa fa-search"></i></button>
-                    </div>
-
-                    <i class="fa fa-group fa-2x text-info"></i>
-                </div>
                 <div class="col-lg-10">
-                    <div class="datatable bg-white border rounded-5 p-2 table-responsive">
-
-                        <table class="table  bg-white">
+                    <div class="datatable bg-white border rounded-5 p-2 table-responsive mb-3">
+                        <table class="table  bg-white table-sm">
                             <thead class="bg-light">
                                 <tr>
                                     <th class="th-sm">#</th>
@@ -107,7 +187,7 @@ include_once "_head.php";
                             <tbody>
 
                                 <?php
-                                $msg2 = null;
+
                                 if (isset($_POST['rechercher'])) {
 
                                     $mots = $_POST['inputRecherche'];
@@ -126,7 +206,7 @@ include_once "_head.php";
                                             <td>
                                                 <form action='' method='post' class=' d-flex flex-row'>
                                                     <a class='btn btn-outline-primary  btn-sm mx-1' href=''><i class='fa fa-edit'></i></a>
-                                                    <a class='btn btn-outline-danger  btn-sm' href='admin_prof.php?id=<?= $id_prof ?>' name='supprimer'><i class='fa fa-trash'></i></a>
+                                                    <a class='btn btn-outline-danger btn-sm' href='admin_prof.php?id=<?= $id_prof ?> ' name='supprimer'><i class='fa fa-trash'></i></a>
                                                 </form>
 
                                             </td>
@@ -160,36 +240,8 @@ include_once "_head.php";
                                     }
                                 }
 
-                                if (isset($_GET['id'])) {
-                                    $prof = new Prof();
-                                    $msg2 = null;
-                                    $matiere = new Matiere();
-
-                                    $res2 = $matiere->matiereDeProf($_GET['id']);
-                                    if (mysqli_num_rows($res2) > 0) {
-                                        while ($donne = mysqli_fetch_assoc($res2)) {
-                                            $id_matiere = $donne['id_matiere'];
-                                            $res2 = $matiere->supprimerMatierDeProf($id_matiere, $_GET['id']);
-                                            $res = $prof->supprimerProf($_GET['id']);
-                                        }
-                                    }
 
 
-                                    if ($res === true) {
-                                        $msg2 =
-                                            '<div class="alert alert-success alert-dismissible fade show mt-3">
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                <strong><i class="fa fa-smile-o"></i></strong> Suppression avec success.
-            </div>';
-                                    } else {
-                                        $msg2 =
-                                            '<div class="alert alert-danger alert-dismissible fade show mt-3">
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                <strong><i class="fa fa-frown-o"></i></strong> Erreur sur suppression .
-            </div>';
-                                    }
-                                }
-                                echo $msg2;
                                 ?>
 
                             </tbody>
@@ -197,13 +249,15 @@ include_once "_head.php";
                     </div>
                 </div>
 
-                <div class="col-lg-2  bg-white border rounded-5 p-3 table-responsive mt-3">
-                    <div class="carte_titr ">
+                <div class="col-lg-2  bg-white border rounded-5 p-3 ">
+
+                    <div class="">
                         <h2>Formulaire </h2>
 
                     </div>
                     <hr class="separateur">
                     <div class="carte_contenue">
+
                         <form class="" method="POST">
                             <div class="info_pers">
                                 <div class="mb-1">
@@ -240,70 +294,9 @@ include_once "_head.php";
                                     <label class="form-label">Heure de travaille</label>
                                     <input type="text" class="form-control form-control-sm" placeholder="Entrer l' heure de travaille " name="heure_Prof">
                                 </div>
-                                <input name="ajouterProf" class="btn btn-primary btn-sm mt-2 w-100" type="submit" value="Ajouter">
+                                <button name="ajouterProf" class="btn btn-primary btn-sm mt-2 w-100" type="submit">Ajouter</button>
                             </div>
-                            <?php
-                            $msg = null;
-                            if (isset($_POST['ajouterProf'])) {
-                                if (!empty($_POST['nom_prof']) || !empty($_POST['prenom_prof']) || !empty($_POST['email_Prof']) || !empty($_POST['heure_Prof']) || !empty($_POST['tel_Prof'])) {
-                                    $admin = new Admin();
-                                    $nom = $_POST['nom_prof'];
-                                    $prenom = $_POST['prenom_prof'];
-                                    $date = $_POST['date_Prof'];
-                                    $email = $_POST['email_Prof'];
-                                    $fonction = $_POST['fonction'];
-                                    $heure = $_POST['heure_Prof'];
-                                    $tel = $_POST['tel_Prof'];
-                                    $mdp = md5("azerty");
-                                    $premier = null;
-                                    $auth = 0;
-                                    if ($fonction == "Chef") {
-                                        $auth = 2;
-                                        $premier = "C-000";
-                                    }
-                                    if ($fonction == "Professeur") {
-                                        $auth = 3;
-                                        $premier = "P-000";
-                                    }
-                                    $prof = new Prof();
-                                    $res = $prof->compterIdentification();
-                                    if (mysqli_num_rows($res) > 0) {
-                                        while ($donnes = mysqli_fetch_assoc($res)) {
-                                            $id_prof = $donnes['identifiant'];
-                                        }
-                                        $l = strlen($id_prof);
-                                        $dernier_nombre = substr($id_prof, -4, $l);
-                                        $dernier_nombre = $dernier_nombre + 1;
-                                        $identifiant = $premier . "" . $dernier_nombre;
-                                    }
-                                    $user = new Utilisateur();
-                                    $existe = $user->siUserExiste('proffesseur', $nom, $prenom);
 
-                                    $res = $admin->ajouterProf($nom, $prenom, $date, $heure, $email, $tel, $identifiant, $mdp, $auth);
-                                    if ($res == true) {
-
-                                        $msg =
-                                            '<div class="alert alert-success alert-dismissible fade show mt-3">
-                                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                                <strong><i class="fa fa-smile-o"></i></strong> Ajout avec success.
-                                            </div>';
-                                    } else {
-                                        include_once "admin_prof.php";
-                                        $msg = '<div class="alert alert-danger alert-dismissible fade show mt-3">
-                                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                                    <strong><i class="fa fa-frown-o"></i></strong> Erreur sur insertion.
-                                                </div>';
-                                    }
-                                } else {
-                                    include_once "admin_prof.php";
-                                    $msg = '<div class="alert alert-warning alert-dismissible fade show mt-3">
-                                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                                    <strong><i class="fa fa-thumbs-o-down"></i></strong> Veuillez remplir les champs.
-                                                </div>';
-                                }
-                            }
-                            echo $msg;
-                            ?>
                         </form>
                     </div>
 

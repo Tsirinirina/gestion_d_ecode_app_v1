@@ -19,6 +19,49 @@ if (!isset($_SESSION['pseudo'])) {
 include_once "_head.php";
 ?>
 
+<?php
+$msg = null;
+
+if (isset($_GET['id'])) {
+    $eleve = new Eleve();
+    $res = $eleve->supprimerEleve($_GET['id']);
+
+    if ($res === true) {
+        $msg =
+            '<div class="alert alert-success alert-dismissible fade show">
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <strong><i class="fa fa-smile-o"></i></strong> Suppression avec success.
+            </div>';
+    } else {
+        $msg =
+            '<div class="alert alert-danger alert-dismissible fade show">
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <strong><i class="fa fa-frown-o"></i></strong> Erreur sur suppression .
+            </div>';
+    }
+}
+
+if (isset($_GET['id'])) {
+    $prof = new Prof();
+    $res = $prof->supprimerProf($_GET['id']);
+
+    if ($res === true) {
+        $msg =
+            '<div class="alert alert-success alert-dismissible fade show">
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                            <strong><i class="fa fa-smile-o"></i></strong> Suppression avec success.
+                                        </div>';
+    } else {
+        $msg =
+            '<div class="alert alert-danger alert-dismissible fade show">
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                            <strong><i class="fa fa-frown-o"></i></strong> Erreur sur suppression .
+                                        </div>';
+    }
+}
+
+?>
+
 <body>
 
     <div class="conteneure">
@@ -34,13 +77,13 @@ include_once "_head.php";
                             <a href="admin_accueil.php" class="nav-link active" aria-current="page">Tableau de Bord </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="admin_prof.php">Proffesseur</a>
+                            <a class="nav-link" href="admin_prof.php">Professeur</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="admin_eleve.php">Eleve</a>
+                            <a class="nav-link" href="admin_eleve.php">Élève</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="admin_matiere.php">Matiere</a>
+                            <a class="nav-link" href="admin_matiere.php">Matière</a>
                         </li>
                     </ul>
 
@@ -77,6 +120,10 @@ include_once "_head.php";
                     <h1>Bonjour</h1>
                     <p>Bienvenue dans l' espace administratif</p>
                 </div>
+            </div>
+            <div>
+                <?php echo $msg; ?>
+
             </div>
             <div class="row  my-3">
                 <div class="col-lg-4 mb-3">
@@ -171,18 +218,16 @@ include_once "_head.php";
                     <h2>Professeur</h2>
                     <div class="datatable bg-white border rounded-5 p-2 table-responsive">
 
-                        <table class="table  bg-white">
+                        <table class="table  bg-white table-sm">
                             <thead class="bg-light">
                                 <tr>
                                     <th class="th-sm">#</th>
                                     <th class="th-sm">Nom</th>
                                     <th class="th-sm">Heure</th>
                                     <th class="th-sm">Identifiant</th>
-                                    <th class="th-sm">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-
                                 <?php
                                 $msg2 = null;
                                 $prof = new Prof();
@@ -195,38 +240,12 @@ include_once "_head.php";
                                         echo "<td>" . $donnes['heure_de_trav'] . "</td>";
                                         echo "<td><span class='badge rounded-pill badge-secondary'>" . $donnes['identifiant'] . "</span></td>";
                                 ?>
-                                        <td>
-                                            <form action='' method='post' class=' d-flex flex-row'>
-                                                <a class='btn btn-outline-primary btn-sm mx-1' href='' id='bouttonModal'><i class='fa fa-edit'></i></a>
-                                                <a class='btn btn-outline-danger btn-sm' href='admin_accueil.php?id=<?= $id_prof ?> ' name='supprimer'><i class='fa fa-trash'></i></a>
-                                            </form>
-                                        </td>
                                         </tr>
                                 <?php
 
                                     }
                                 }
-                                if (isset($_GET['id'])) {
-                                    $prof = new Prof();
-                                    $res = $prof->supprimerProf($_GET['id']);
-
-                                    if ($res === true) {
-                                        $msg2 =
-                                            '<div class="alert alert-success alert-dismissible fade show">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                            <strong><i class="fa fa-smile-o"></i></strong> Suppression avec success.
-                                        </div>';
-                                    } else {
-                                        $msg2 =
-                                            '<div class="alert alert-danger alert-dismissible fade show">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                            <strong><i class="fa fa-frown-o"></i></strong> Erreur sur suppression .
-                                        </div>';
-                                    }
-                                }
-                                echo $msg2;
                                 ?>
-
                             </tbody>
                         </table>
                     </div>
@@ -235,18 +254,17 @@ include_once "_head.php";
                 <div class="col-lg-6">
                     <h2>Étudiant</h2>
                     <div class="datatable bg-white border rounded-5 p-2 table-responsive">
-                        <table class="table  bg-white">
+                        <table class="table  bg-white  table-sm">
                             <thead class="bg-light">
                                 <tr>
                                     <th class="th-sm">#</th>
                                     <th class="th-sm">Nom</th>
                                     <th class="th-sm">Niveau</th>
-                                    <th class="th-sm">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
-                                $msg = null;
+                             
                                 $eleve = new Eleve();
                                 $res = $eleve->afficherEleve();
                                 if (mysqli_num_rows($res) > 0) {
@@ -257,38 +275,11 @@ include_once "_head.php";
                                         echo "<td><span class='badge rounded-pill badge-secondary'>" . $donnes['identifiant'] . "</span></td>";
 
                                 ?>
-                                        <td>
-                                            <form action='' method='post' class=' d-flex flex-row'>
-                                                <a class='btn btn-outline-primary  btn-sm mx-1' href='admin_accueil.php?id_modifier=<?= $id_eleve ?> ' id='bouttonModal'><i class='fa fa-edit'></i></a>
-                                                <a class='btn btn-outline-danger btn-sm' href='admin_accueil.php?id=<?= $id_eleve ?> ' name='supprimer'><i class='fa fa-trash'></i></a>
-                                            </form>
-
-                                        </td>
                                         </tr>
                                 <?php
                                     }
                                 }
-                                if (isset($_GET['id'])) {
-                                    $eleve = new Eleve();
-                                    $res = $eleve->supprimerEleve($_GET['id']);
-
-                                    if ($res === true) {
-                                        $msg =
-                                            '<div class="alert alert-success alert-dismissible fade show">
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                <strong><i class="fa fa-smile-o"></i></strong> Suppression avec success.
-            </div>';
-                                    } else {
-                                        $msg =
-                                            '<div class="alert alert-danger alert-dismissible fade show">
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                <strong><i class="fa fa-frown-o"></i></strong> Erreur sur suppression .
-            </div>';
-                                    }
-                                }
-                                echo $msg;
                                 ?>
-
                             </tbody>
                         </table>
                     </div>

@@ -45,7 +45,7 @@ class Matiere
     {
         $db = new ConnectBase();
         $con = $db->getConnex();
-        $sql = "SELECT * FROM `matiere`";
+        $sql = "SELECT `matiere`.*, `proffesseur`.`prenom` FROM `matiere` LEFT JOIN `proffesseur` ON `matiere`.`id_prof` = `proffesseur`.`id_prof`;";
         $res = mysqli_query($con, $sql);
         return $res;
     }
@@ -91,7 +91,7 @@ class Matiere
         }
         return $msg;
     }
-    
+
     public function matiereDeProf(int $id_prof)
     {
         $db = new ConnectBase();

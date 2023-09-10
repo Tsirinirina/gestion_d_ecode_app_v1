@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
 <?php
 
 session_start();
@@ -16,13 +14,67 @@ spl_autoload_register('monAutoloader');
 include_once "_head.php";
 ?>
 
+<?php
+$msg = null;
+if (isset($_POST['ajouterEleve'])) {
 
+    if (!empty($_POST['nom_eleve']) || !empty($_POST['prenom_eleve']) || !empty($_POST['email_eleve']) || !empty($_POST['lieux']) || !empty($_POST['tel_eleve'])) {
+        $nom = $_POST['nom_eleve'];
+        $prenom = $_POST['prenom_eleve'];
+        $date = $_POST['date_eleve'];
+        $email = $_POST['email_eleve'];
+
+        $lieux = $_POST['lieux'];
+        $tel = $_POST['tel_eleve'];
+        $niveau = $_POST['niveau'];
+        $mdp = md5("azerty");
+
+        $auth = 4;
+        $premier = "E-000";
+        $eleve = new Eleve();
+        $res = $eleve->compterIdentification();
+        if (mysqli_num_rows($res) > 0) {
+            while ($donnes = mysqli_fetch_assoc($res)) {
+                $id_eleve = $donnes['identifiant'];
+            }
+            $l = strlen($id_eleve);
+            $dernier_nombre = substr($id_eleve, -4, $l);
+            $dernier_nombre = $dernier_nombre + 1;
+            $identifiant = $premier . "" . $dernier_nombre;
+        }
+
+        $user = new Utilisateur();
+        $existe = $user->siUserExiste('eleve', $nom, $prenom);
+        $admin = new Admin();
+        $res = $admin->ajouterEleve($nom, $prenom, $date, $lieux, $email, $tel, $niveau, $identifiant, $mdp, $auth);
+        if ($res == true) {
+            $msg =
+                '<div class="alert alert-success alert-dismissible fade show">
+                                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                                            <strong><i class="fa fa-smile-o"></i></strong> Ajout avec succès.
+                                                        </div>';
+        } else {
+            $msg = '<div class="alert alert-danger alert-dismissible fade show">
+                                                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                                                <strong><i class="fa fa-frown-o"></i></strong> Erreur sur insertion.
+                                                            </div>';
+        }
+    } else {
+        $msg = '<div class="alert alert-warning alert-dismissible fade show">
+                                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                                    <strong><i class="fa fa-thumbs-o-down"></i></strong> Veuillez remplir les champs.
+                                                </div>';
+    }
+}
+
+
+?>
 
 <body>
 
     <div class="conteneure">
 
-        <nav class="navbar navbar-expand-lg bg-body-tertiary fixed-top">
+        <nav class="navbar navbar-expand-lg bg-light fixed-top">
             <div class="container-fluid">
                 <a class="navbar-brand" href="#"><a href="admin_accueil.php"><img src="img\logo1.png" alt="LOGO" srcset=""></a></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,13 +86,13 @@ include_once "_head.php";
                             <a href="admin_accueil.php" class="nav-link ">Tableau de Bord </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link " href="admin_prof.php">Proffesseur</a>
+                            <a class="nav-link " href="admin_prof.php">Professeur</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" href="admin_eleve.php" aria-current="page">Eleve</a>
+                            <a class="nav-link active" href="admin_eleve.php" aria-current="page">Élève</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link " href="admin_matiere.php">Matiere</a>
+                            <a class="nav-link " href="admin_matiere.php">Matière</a>
                         </li>
                     </ul>
 
@@ -75,228 +127,119 @@ include_once "_head.php";
                     <p>Bienvenue dans l' espace administratif</p>
                 </div>
             </div>
+            <div>
+                <?php echo $msg; ?>
+            </div>
+            <div>
+                <h2>Élève</h2>
+            </div>
+            <div class="row">
+                <div class="col-lg-10">
+                    <div class="datatable bg-white border rounded-5 p-2 table-responsive">
+                        <table class="table  bg-white  table-sm">
+                            <thead class="bg-light">
+                                <tr>
+                                    <td>N°</td>
+                                    <td>Nom</td>
+                                    <td>Née le</td>
+                                    <td>Email</td>
+                                    <td>Telephone</td>
+                                    <td>Niveau</td>
+                                    <td>Identifiant</td>
+                                    <td>Action</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
 
-
-
-            <div class="liste_centre">
-                <div class="cart_liste">
-                    <div class="carte_titr">
-                        <h2>Elève</h2>
-                        <i class="fa fa-group fa-2x text-info"></i>
-                    </div>
-                    <table class="tableau">
-                        <tr class="table_titre">
-                            <td>N°</td>
-                            <td>Nom</td>
-                            <td>Date de naissance</td>
-                            <td>email</td>
-                            <td>Télephone</td>
-                            <td>Niveau</td>
-                            <td>Identifiant</td>
-                            <td>Action</td>
-                        </tr>
-                        <tr class="table_contenue">
-
-                            <?php
-                            $msg2 = null;
-                            $eleve = new Eleve();
-                            $res = $eleve->afficherEleve();
-                            if (mysqli_num_rows($res) > 0) {
-                                while ($donnes = mysqli_fetch_assoc($res)) {
-                                    $id_eleve = $donnes['id_eleve'];
-                                    echo "<td>" . $donnes['id_eleve'] . "</td>";
-                                    echo "<td class='fw-bold'>" . $donnes['nom'] . " " . $donnes['prenom'] . "</td>";
-                                    echo "<td>" . $donnes['date_naissance'] . "</td>";
-
-                                    echo "<td>" . $donnes['email'] . "</td>";
-                                    echo "<td>" . $donnes['tel'] . "</td>";
-                                    echo "<td>" . $donnes['niveau'] . "</td>";
-                                    echo "<td>" . $donnes['identifiant'] . "</td>";
-
-                            ?>
-                                    <td>
-                                        <form action='' method='post' class="d-flex justify-content-around">
-                                            <a class='btn btn-outline-primary mx-2' href=''><i class='fa fa-edit'></i></a>
-                                            <a class='btn btn-outline-danger' href='admin_eleve.php?id=<?= $id_eleve ?>' name='supprimer'><i class='fa fa-trash'></i></a>
-                                        </form>
-                                    </td>
-                            <?php
-                                }
-                            }
-
-                            if (isset($_GET['id'])) {
                                 $eleve = new Eleve();
-                                $res = $eleve->supprimerEleve($_GET['id']);
+                                $res = $eleve->afficherEleve();
+                                if (mysqli_num_rows($res) > 0) {
+                                    while ($donnes = mysqli_fetch_assoc($res)) {
+                                        $id_eleve = $donnes['id_eleve'];
+                                        echo "<tr><td>" . $donnes['id_eleve'] . "</td>";
+                                        echo "<td class='fw-bold'>" . $donnes['nom'] . " " . $donnes['prenom'] . "</td>";
+                                        echo "<td class='fw-bold'>" . $donnes['date_naissance'] . "</td>";
+                                        echo "<td class='fw-bold'>" . $donnes['email'] . "</td>";
+                                        echo "<td class='fw-bold'>" . $donnes['tel'] . "</td>";
+                                        echo "<td class='fw-bold'>" . $donnes['niveau'] . "</td>";
+                                        echo "<td><span class='badge rounded-pill badge-secondary'>" . $donnes['identifiant'] . "</span></td>";
 
-                                if ($res === true) {
-                                    $msg2 =
-                                        '<div class="alert alert-success alert-dismissible fade show">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                            <strong><i class="fa fa-smile-o"></i></strong> Suppression avec success.
-                                        </div>';
-                                } else {
-                                    $msg2 =
-                                        '<div class="alert alert-danger alert-dismissible fade show">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                            <strong><i class="fa fa-frown-o"></i></strong> Erreur sur suppression .
-                                        </div>';
+                                ?>
+                                        <td>
+                                            <form action='' method='post' class=' d-flex flex-row'>
+                                                <a class='btn btn-outline-primary  btn-sm mx-1' href='admin_accueil.php?id_modifier=<?= $id_eleve ?> ' id='bouttonModal'><i class='fa fa-edit'></i></a>
+                                                <a class='btn btn-outline-danger btn-sm' href='admin_accueil.php?id=<?= $id_eleve ?> ' name='supprimer'><i class='fa fa-trash'></i></a>
+                                            </form>
+
+                                        </td>
+                                        </tr>
+                                <?php
+                                    }
                                 }
-                            }
-                            echo $msg2;
-                            ?>
-                        </tr>
 
-                    </table>
+                                ?>
 
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+                <div class="col-lg-2 bg-white border rounded-5 p-3">
 
-
-
-                <div class="cart_liste">
                     <div class="carte_titr">
                         <h2>Formulaire </h2>
-
                     </div>
                     <hr class="separateur">
                     <div class="carte_contenue">
                         <form class="" method="POST">
                             <div class="info_pers">
-
-                                <label for="">Nom</label>
-                                <label for="">Prenom</label>
-
-
-                                <input type="text" name="nom_eleve" placeholder="Entrer le nom">
-                                <input type="text" name="prenom_eleve" placeholder="Entrer le Prenom">
-
-                                <label for="">Date de naissance</label>
-                                <label for="">Lieux de naissance</label>
-
-                                <input type="date" name="date_eleve" value="1999-01-01">
-                                <input type="text" name="lieux" placeholder="Entrer le lieux'">
-
-
-
+                                <div class="mb-1">
+                                    <label class="form-label">Nom</label>
+                                    <input type="text" class="form-control form-control-sm" placeholder="Entrez le nom" name="nom_eleve">
+                                </div>
+                                <div class="mb-1">
+                                    <label class="form-label">Prénom</label>
+                                    <input type="text" class="form-control form-control-sm" placeholder="Entrez le prénom" name="prenom_eleve">
+                                </div>
+                                <div class="mb-1">
+                                    <label class="form-label">Date de naissance</label>
+                                    <input type="date" class="form-control form-control-sm" placeholder="Entrez le nom" name="date_eleve" value="1999-01-01" min="1999-01-01">
+                                </div>
+                                <div class="mb-1">
+                                    <label class="form-label">Lieux</label>
+                                    <input type="text" class="form-control form-control-sm" placeholder="Entrez le lieux de naissance " name="lieux">
+                                </div>
+                                <div class="mb-1">
+                                    <label class="form-label">Email</label>
+                                    <input type="text" class="form-control form-control-sm" placeholder="Entrez le lieux de naissance " name="email_eleve">
+                                </div>
                             </div>
                             <div class="info_fonction">
-                                <label for="">Email</label>
-                                <label for="">Niveau</label>
-
-                                <input type="email" name="email_eleve" placeholder="Entrer votre E-mail">
-                                <select name="niveau" id="">
-                                    <option value="L1">L1</option>
-                                    <option value="L2">L2</option>
-                                    <option value="L3">L2</option>
-                                    <option value="Términale">Términale</option>
-
-                                </select>
-
-                                <input type="text" name="tel_eleve" placeholder="Entrer le numero de télephone">
-
-
-                                <input name="ajouterEleve" class="ajouter" type="submit" value="Ajouter">
-
-
+                                <div class="mb-1">
+                                    <label class="form-label">Niveau</label>
+                                    <select class="form-select form-select-sm" aria-label="Small select example" name="niveau">
+                                        <option value="L1">L1</option>
+                                        <option value="L2">L2</option>
+                                        <option value="L3">L2</option>
+                                        <option value="Terminale">Terminale</option>
+                                    </select>
+                                </div>
+                                <div class="mb-1">
+                                    <label class="form-label">Téléphone</label>
+                                    <input type="tel" class="form-control form-control-sm" placeholder="Entrez le numero de téléphone " name="tel_eleve">
+                                </div>
+                                <button name="ajouterEleve" class="btn btn-primary btn-sm mt-3 w-100" type="submit">Ajouter</button>
                             </div>
-                            <?php
-                            $msg = null;
-                            if (isset($_POST['ajouterEleve'])) {
 
-                                if (!empty($_POST['nom_eleve']) || !empty($_POST['prenom_eleve']) || !empty($_POST['email_eleve']) || !empty($_POST['lieux']) || !empty($_POST['tel_eleve'])) {
-                                    $nom = $_POST['nom_eleve'];
-                                    $prenom = $_POST['prenom_eleve'];
-                                    $date = $_POST['date_eleve'];
-                                    $email = $_POST['email_eleve'];
-
-                                    $lieux = $_POST['lieux'];
-                                    $tel = $_POST['tel_eleve'];
-                                    $niveau = $_POST['niveau'];
-                                    $mdp = md5("azerty");
-
-                                    $auth = 4;
-                                    $premier = "E-000";
-                                    $eleve = new Eleve();
-                                    $res = $eleve->compterIdentification();
-                                    if (mysqli_num_rows($res) > 0) {
-                                        while ($donnes = mysqli_fetch_assoc($res)) {
-                                            $id_eleve = $donnes['identifiant'];
-                                        }
-                                        $l = strlen($id_eleve);
-                                        $dernier_nombre = substr($id_eleve, -4, $l);
-                                        $dernier_nombre = $dernier_nombre + 1;
-                                        $identifiant = $premier . "" . $dernier_nombre;
-                                    }
-
-                                    $user = new Utilisateur();
-                                    $existe = $user->siUserExiste('eleve', $nom, $prenom);
-                                    $admin = new Admin();
-                                    $res = $admin->ajouterEleve($nom, $prenom, $date, $lieux, $email, $tel, $niveau, $identifiant, $mdp, $auth);
-                                    if ($res == true) {
-                                        $msg =
-                                            '<div class="alert alert-success alert-dismissible fade show">
-                                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                                            <strong><i class="fa fa-smile-o"></i></strong> Ajout avec success.
-                                                        </div>';
-                                    } else {
-                                        $msg = '<div class="alert alert-danger alert-dismissible fade show">
-                                                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                                                <strong><i class="fa fa-frown-o"></i></strong> Erreur sur insertion.
-                                                            </div>';
-                                    }
-                                } else {
-                                    $msg = '<div class="alert alert-warning alert-dismissible fade show">
-                                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                                    <strong><i class="fa fa-thumbs-o-down"></i></strong> Veuillez remplir les champs.
-                                                </div>';
-                                }
-                            }
-
-                            echo $msg;
-                            ?>
                         </form>
                     </div>
 
                 </div>
-
             </div>
-
-
-
-
-
-
-
-
-
-
-
         </main>
 
 
     </div>
-    <script>
-        // TOGGLE BAR ;
-        var sidebarOuvert = false;
-        var sidebar = document.getElementById("sidebar");
-        var sideFermerIcon = document.getElementById("sidebarIcon");
-
-        function sideOuvert() {
-            if (!sidebarOuvert) {
-                sidebar.classList.add("sidebar_responsive");
-                sidebarOuvert = true;
-            }
-        }
-
-        function sideFermer() {
-            if (sidebarOuvert) {
-                sidebar.classList.remove("sidebar_responsive");
-                sidebarOuvert = false;
-            }
-        }
-
-        var close = document.querySelector(".close");
-    </script>
-
 </body>
 <?php include_once "_script.php" ?>
 

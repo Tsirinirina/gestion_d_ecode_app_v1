@@ -32,4 +32,38 @@
 </div>
 
 
+
 $sql = "SELECT `admin`.`auth` FROM `admin`  WHERE `identifiant` = '$this->identifiant' OR SELECT `eleve`.`auth`  FROM  `eleve` WHERE `identifiant` = '$this->identifiant' OR SELECT `proffesseur`.`auth` FROM  `proffesseur` WHERE `identifiant` = '$this->identifiant' ";
+
+
+
+
+if (isset($_GET['id'])) {
+    $prof = new Prof();
+    $msg2 = null;
+    $matiere = new Matiere();
+
+    $res2 = $matiere->matiereDeProf($_GET['id']);
+    if (mysqli_num_rows($res2) > 0) {
+        while ($donne = mysqli_fetch_assoc($res2)) {
+            $id_matiere = $donne['id_matiere'];
+            $res2 = $matiere->supprimerMatierDeProf($id_matiere, $_GET['id']);
+            $res = $prof->supprimerProf($_GET['id']);
+        }
+    }
+
+
+    if ($res === true) {
+        $msg2 =
+            '<div class="alert alert-success alert-dismissible fade show">
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <strong><i class="fa fa-smile-o"></i></strong> Suppression avec success.
+            </div>';
+    } else {
+        $msg2 =
+            '<div class="alert alert-danger alert-dismissible fade show">
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <strong><i class="fa fa-frown-o"></i></strong> Erreur sur suppression .
+            </div>';
+    }
+}
